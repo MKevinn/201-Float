@@ -3,10 +3,11 @@ import java.util.regex.Pattern;
 import java.util.UUID;
 
 public class User {
+    private String uuid;
+
     private String emailAddress;
     private String password;
     private String userName;
-    private String uuid;
 
     public User(String emailAddress, String password, String userName) {
         this.emailAddress = emailAddress;
