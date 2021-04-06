@@ -1,4 +1,6 @@
-import java.util.regex.Matcher;
+package com.models;
+
+import java.util.ArrayList;
 import java.util.regex.Pattern;
 import java.util.UUID;
 
@@ -8,11 +10,13 @@ public class User {
     private String emailAddress;
     private String password;
     private String userName;
+    private ArrayList<String> postIDs;
 
     public User(String emailAddress, String password, String userName) {
         this.emailAddress = emailAddress;
         this.password = password;
         this.userName = userName;
+        this.postIDs = new ArrayList<String>();
         uuid = UUID.randomUUID().toString();
     }
 
@@ -56,4 +60,16 @@ public class User {
     public boolean isValidPassword() {
         return password.length()>=8;
     }
+
+    @Override
+    public String toString() {
+        return "User{" +
+                "uuid='" + uuid + '\'' +
+                ", emailAddress='" + emailAddress + '\'' +
+                ", password='" + password + '\'' +
+                ", userName='" + userName + '\'' +
+                ", postIDs=" + postIDs +
+                '}';
+    }
 }
+

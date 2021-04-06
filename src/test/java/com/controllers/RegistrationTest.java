@@ -1,6 +1,10 @@
+package com.controllers;
+
 import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.api.Test;
 import org.junit.Assert;
+
+import com.models.User;
 
 public class RegistrationTest {
 
@@ -48,3 +52,4 @@ public class RegistrationTest {
         Assert.assertFalse(user.isValidPassword());
     }
 }
+
