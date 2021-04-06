@@ -5,7 +5,7 @@ public class Response<T> {
     private String message;
     private T data;
 
-    public  Response() {}
+    public Response() {}
 
     public Response(Boolean status, String message, T data) {
         this.status = status;
