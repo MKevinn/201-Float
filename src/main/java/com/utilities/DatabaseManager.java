@@ -16,9 +16,11 @@ public class DatabaseManager {
         // insert user to db
     }
 
-    public Boolean auth(String email, String psw) {
+    public User auth(String email, String psw) {
         // authentication
-        return true;
+        // find user
+        User user = new User(email,psw,"usr");
+        return user;
     }
 
 }

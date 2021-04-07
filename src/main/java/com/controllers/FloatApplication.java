@@ -15,18 +15,15 @@ public class FloatApplication {
 		SpringApplication.run(FloatApplication.class, args);
 	}
 
-	@GetMapping("/signup")
-	public Response signup(@RequestParam(value = "name",defaultValue = "") String name,
-						   @RequestParam(value = "email",defaultValue = "") String email,
-						   @RequestParam(value = "psw", defaultValue = "") String psw) {
-		User user = new User(email, psw, name);
+	@PostMapping("/signup")
+	public Response signup(@RequestBody User user) {
 		Response res = new Response();
 		if (!user.isValidEmailAddress()) {
 			res.setStatus(false);
 			res.setMessage("invalid email");
 		} else if (!user.isValidPassword()) {
 			res.setStatus(false);
-			res.setMessage("invalid password");
+			res.setMessage("minimum password length: 8");
 		} else {
 			DatabaseManager.shared.insertUserToDatabase(user);
 			res.setStatus(true);
@@ -35,9 +32,12 @@ public class FloatApplication {
 	}
 
 	@GetMapping("/login")
-	public Response signup(@RequestParam(value = "email",defaultValue = "") String email,
+	public Response<User> signup(@RequestParam(value = "email",defaultValue = "") String email,
 						   @RequestParam(value = "psw", defaultValue = "") String psw) {
-		Response res = new Response(DatabaseManager.shared.auth(email,psw),null,null);
-		return res;
+		User user = DatabaseManager.shared.auth(email,psw);
+		if (user==null) {
+			return new Response(false, "Unable to login", null);
+		}
+		return new Response(true,null,user);
 	}
 }
