@@ -6,7 +6,6 @@ import java.util.UUID;
 public class Post {
     private String postID;
 
-    private String title;
     private String content;
     private ArrayList<String> tags;        // also add this post after according tags
     private int likedCount;
@@ -15,8 +14,7 @@ public class Post {
     private String anonymousPosterName;    // user can choose a name as an input
     private String userUuid;
 
-    public Post(String title, String content, ArrayList<String> tags, int likedCount, String anonymousPosterName, String userUuid) {
-        this.title = title;
+    public Post(String content, ArrayList<String> tags, int likedCount, String anonymousPosterName, String userUuid) {
         this.content = content;
         this.tags = tags;
         this.likedCount = likedCount;
@@ -30,8 +28,8 @@ public class Post {
         return commentIDs;
     }
 
-    public void setCommentIDs(ArrayList<String> commentIDs) {
-        this.commentIDs = commentIDs;
+    public void addCommentID(String commentID) {
+        commentIDs.add(commentID);
     }
 
     public ArrayList<String> getTags() {
@@ -68,10 +66,6 @@ public class Post {
 
     public String getPostID() {
         return postID;
-    }
-
-    public String getTitle() {
-        return title;
     }
 
     public String getUserUuid() {
