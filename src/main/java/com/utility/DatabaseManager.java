@@ -16,6 +16,7 @@ import com.google.auth.oauth2.GoogleCredentials;
 
 import com.google.firebase.FirebaseApp;
 import com.google.firebase.FirebaseOptions;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.lang.Nullable;
 
 public class DatabaseManager {
@@ -49,7 +50,7 @@ public class DatabaseManager {
 
     private DatabaseManager() {
         try {
-            InputStream serviceAccount = new FileInputStream(K.SERVICE_ACCOUNT_PATH);
+            InputStream serviceAccount = new ClassPathResource(K.SERVICE_ACCOUNT_FILENAME).getInputStream();
             GoogleCredentials credentials = GoogleCredentials.fromStream(serviceAccount);
             FirebaseOptions options = new FirebaseOptions.Builder()
                     .setCredentials(credentials)
