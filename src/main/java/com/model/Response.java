@@ -1,13 +1,26 @@
-package com.models;
+package com.model;
+
+import org.springframework.lang.Nullable;
 
 public class Response<T> {
     private Boolean status;
     private String message;
+
+    @Nullable
     private T data;
 
     public Response() {}
 
-    public Response(Boolean status, String message, T data) {
+    public Response(Boolean status) {
+        this.status = status;
+    }
+
+    public Response(Boolean status, String message) {
+        this.status = status;
+        this.message = message;
+    }
+
+    public Response(Boolean status, String message, @Nullable T data) {
         this.status = status;
         this.message = message;
         this.data = data;
@@ -21,12 +34,13 @@ public class Response<T> {
         this.message = message;
     }
 
-    public T getData() {
-        return data;
+    public void setData(@Nullable T data) {
+        this.data = data;
     }
 
-    public void setData(T data) {
-        this.data = data;
+    @Nullable
+    public T getData() {
+        return data;
     }
 
     public Boolean getStatus() {

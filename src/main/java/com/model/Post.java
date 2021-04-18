@@ -1,4 +1,4 @@
-package com.models;
+package com.model;
 
 import java.util.ArrayList;
 import java.util.UUID;
@@ -7,29 +7,25 @@ public class Post {
     private String postID;
 
     private String content;
-    private ArrayList<String> tags;        // also add this post after according tags
+    private ArrayList<String> tags;
     private int likedCount;
-    private ArrayList<String> commentIDs;  // fetch comments using commentIDs
+    private ArrayList<Comment> comments;  // after get a post json data, fetch comments using commentIDs
 
-    private String anonymousPosterName;    // user can choose a name as an input
+    private String anonymousPosterName;
     private String userUuid;
 
-    public Post(String content, ArrayList<String> tags, int likedCount, String anonymousPosterName, String userUuid) {
+    public Post(String postID, String content, ArrayList<String> tags, int likedCount, ArrayList<Comment> comments, String anonymousPosterName, String userUuid) {
+        this.postID = postID;
         this.content = content;
         this.tags = tags;
         this.likedCount = likedCount;
-        this.commentIDs = new ArrayList<String>();
+        this.comments = comments;
         this.anonymousPosterName = anonymousPosterName;
         this.userUuid = userUuid;
-        postID = UUID.randomUUID().toString();
     }
 
-    public ArrayList<String> getCommentIDs() {
-        return commentIDs;
-    }
-
-    public void addCommentID(String commentID) {
-        commentIDs.add(commentID);
+    public ArrayList<Comment> getComments() {
+        return comments;
     }
 
     public ArrayList<String> getTags() {
