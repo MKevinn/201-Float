@@ -12,10 +12,14 @@ import java.util.ArrayList;
 public class PostService {
 
     public ResponseEntity insertPost(Post post) {
-        DatabaseManager.shared.insertPostToDbAfter(post.getUserUuid(),post);
-        return ResponseEntity
-                .ok()
-                .body(new Response(true,null,post));
+    	Response<Post> response = DatabaseManager.shared.createPost(post.getContent(), post.getAnonymousPosterName(), post.getUserUuid());
+    	if (!response.getStatus())
+            return ResponseEntity
+                    .badRequest()
+                    .body(response);
+        return ResponseEntity.
+                ok().
+                body(response);
     }
 
     public ResponseEntity readPost(String postID) {

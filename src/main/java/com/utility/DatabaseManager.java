@@ -99,6 +99,55 @@ public class DatabaseManager {
         return new Response(false);
     }
 
+    public Response createPost(String content, String anonymousPosterName, 
+    							String userUuid) {
+        String uuid = UUID.randomUUID().toString();
+        DocumentReference docRef = db
+                .collection(K.POSTS_COLLECTION)
+                .document(uuid);
+        Post post = new Post(uuid, 
+			        		content, new ArrayList<>(), 0, 
+			        		new ArrayList<>() , 
+			        		anonymousPosterName, 
+			        		userUuid);
+        ApiFuture<WriteResult> future = docRef.set(post);
+        try {
+            System.out.println(future.get().getUpdateTime());
+            return new Response(true,null,post);
+        } catch (InterruptedException | ExecutionException e) {
+            e.printStackTrace();
+        }
+    	return new Response(false);
+    }
+    
+    public Response insertComment(String anonymousPosterName, String content, String postID) {
+    	String uuid = UUID.randomUUID().toString();
+    	DocumentReference docRef = db
+                .collection(K.POSTS_COLLECTION + "/" + postID + "/comments")
+                .document(uuid);
+    	Comment comment = new Comment(anonymousPosterName, content);
+    	ApiFuture<WriteResult> future = docRef.set(comment);
+    	try {
+            System.out.println(future.get().getUpdateTime());
+            return new Response(true,null,comment);
+        } catch (InterruptedException | ExecutionException e) {
+            e.printStackTrace();
+        }
+    	return new Response(false);
+    }
+    
+    public Response getGuestPosts() {
+    	return new Response(false);
+    }
+    
+    public Response getAllPosts() {
+    	return new Response(false);
+    }
+
+    public Response getPost(String postID) {
+    	return new Response(false);
+    }
+    
     public Response auth(String email, String psw) {
         DocumentSnapshot user = checkEmailExistsAccount(email);
         if (user == null)
@@ -108,8 +157,21 @@ public class DatabaseManager {
         return new Response(true,null,user.toObject(User.class));
     }
 
-    public void insertPostToDbAfter(String userID, Post post) {
+    public Response insertPostToDbAfter(String userID, Post post) {
         // insert a new post
+    	 String uuid = UUID.randomUUID().toString();
+         String anonymousPosterName = uuid;
+         DocumentReference docRef = db
+                 .collection(K.POSTS_COLLECTION)
+                 .document(post.getPostID());
+         ApiFuture<WriteResult> future = docRef.set(post);
+         try {
+             System.out.println(future.get().getUpdateTime());
+             return new Response(true,null,post);
+         } catch (InterruptedException | ExecutionException e) {
+             e.printStackTrace();
+         }
+     	return new Response(false);
     }
 
     public Post queryPostBy(String postID) {
@@ -120,10 +182,6 @@ public class DatabaseManager {
     public ArrayList<Post> queryPostsBy(String keyword) {
         // get posts
         return getSamplePosts();
-    }
-
-    public Comment insertComment(String postID, Comment comment) {
-        return getSampleComment();
     }
 
 }

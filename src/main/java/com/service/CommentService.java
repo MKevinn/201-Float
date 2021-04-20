@@ -10,7 +10,8 @@ import org.springframework.stereotype.Service;
 public class CommentService {
 
     public ResponseEntity insertComment(String postID, Comment comment) {
-        DatabaseManager.shared.insertComment(postID,comment);
+        DatabaseManager.shared.insertComment(comment.getAnonymousPosterName(),
+        		comment.getContent(), postID);
         return ResponseEntity
                 .ok()
                 .body(new Response<Comment>(true,null,comment));
