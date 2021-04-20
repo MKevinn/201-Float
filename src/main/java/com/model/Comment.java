@@ -9,6 +9,9 @@ public class Comment {
         this.content = content;
     }
 
+    public Comment() {
+    }
+
     public String getAnonymousPosterName() {
         return anonymousPosterName;
     }
