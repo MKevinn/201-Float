@@ -9,6 +9,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 
@@ -174,14 +175,55 @@ public class DatabaseManager {
      	return new Response(false);
     }
 
-    public Post queryPostBy(String postID) {
+    public Post queryPostByID(String postID) {
         // get a post
-        return getSamplePost();
+    	DocumentReference docRef = db
+    			.collection(K.POSTS_COLLECTION)
+    			.document(postID);
+    	ApiFuture<DocumentSnapshot> future = docRef.get();
+    	DocumentSnapshot document;
+    	Post post = null;
+		try {
+			document = future.get();
+			if (document.exists()) {
+				post = document.toObject(Post.class);
+				System.out.println("Document data: " + document.getData());
+				post.setComments(getCommentsForPost(postID));
+				return post;
+	    	} else {
+	    		System.out.println("No such document!");
+	   		}
+		} catch (InterruptedException | ExecutionException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+    	return post;
     }
 
     public ArrayList<Post> queryPostsBy(String keyword) {
         // get posts
         return getSamplePosts();
     }
-
+    
+    public ArrayList<Comment> getCommentsForPost(String postID) {
+    	CollectionReference commentRef = db
+    			.collection(K.POSTS_COLLECTION + "/" + postID + "/comments");
+    	ApiFuture<QuerySnapshot> postComments = commentRef.get();
+    	List<QueryDocumentSnapshot> documents = null;
+    	ArrayList<Comment> postCommentData = new ArrayList<Comment>();
+    	try {
+			documents = postComments.get().getDocuments();
+			for (QueryDocumentSnapshot document : documents) {
+				Comment comment = null;
+				comment = document.toObject(Comment.class);
+				System.out.println("document data comments" + document.getData());
+				postCommentData.add(comment);
+			}
+		} catch (InterruptedException | ExecutionException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+    	return postCommentData;
+    }
 }

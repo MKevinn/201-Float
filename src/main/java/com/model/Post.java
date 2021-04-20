@@ -70,5 +70,9 @@ public class Post {
     public String getUserUuid() {
         return userUuid;
     }
+
+	public void setComments(ArrayList<Comment> postCommentData) {
+		comments = postCommentData;
+	}
 }
 

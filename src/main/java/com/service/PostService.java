@@ -23,7 +23,7 @@ public class PostService {
     }
 
     public ResponseEntity readPost(String postID) {
-        Post post = DatabaseManager.shared.queryPostBy(postID);
+        Post post = DatabaseManager.shared.queryPostByID(postID);
         if (post==null) {
             return ResponseEntity
                     .badRequest()
