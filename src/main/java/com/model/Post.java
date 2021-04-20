@@ -14,6 +14,9 @@ public class Post {
     private String anonymousPosterName;
     private String userUuid;
 
+    public Post() {
+    }
+
     public Post(String postID, String content, ArrayList<String> tags, int likedCount, ArrayList<Comment> comments, String anonymousPosterName, String userUuid) {
         this.postID = postID;
         this.content = content;
