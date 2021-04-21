@@ -5,4 +5,6 @@ public class K {
 
     public static final String USERS_COLLECTION = "users";
     public static final String POSTS_COLLECTION = "posts";
+
+    public static final String USERS_POSTIDS_FIELD = "postIDs";
 }

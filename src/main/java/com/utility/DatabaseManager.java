@@ -100,6 +100,15 @@ public class DatabaseManager {
         return new Response(false);
     }
 
+    public Response auth(String email, String psw) {
+        DocumentSnapshot user = checkEmailExistsAccount(email);
+        if (user == null)
+            return new Response(false,"The account with this email address does not exist");
+        else if (!user.get("password").equals(psw))
+            return new Response(false, "Either your login email or password is incorrect");
+        return new Response(true,null,user.toObject(User.class));
+    }
+
     public Response createPost(String content, String anonymousPosterName, 
     							String userUuid) {
         String uuid = UUID.randomUUID().toString();
@@ -112,6 +121,7 @@ public class DatabaseManager {
 			        		anonymousPosterName, 
 			        		userUuid);
         ApiFuture<WriteResult> future = docRef.set(post);
+        insertPostToDbAfterUser(userUuid,uuid);
         try {
             System.out.println(future.get().getUpdateTime());
             return new Response(true,null,post);
@@ -119,6 +129,19 @@ public class DatabaseManager {
             e.printStackTrace();
         }
     	return new Response(false);
+    }
+
+    // insert the newly created post's postID in the poster's postIDs' array
+    public void insertPostToDbAfterUser(String userID, String postID) {
+        DocumentReference docRef = db
+                .collection(K.USERS_COLLECTION)
+                .document(userID);
+        ApiFuture<WriteResult> future = docRef.update(K.USERS_POSTIDS_FIELD, FieldValue.arrayUnion(postID));
+        try {
+            System.out.println(postID+" appended to array. "+future.get().getUpdateTime());
+        } catch (InterruptedException | ExecutionException e) {
+            e.printStackTrace();
+        }
     }
     
     public Response insertComment(String anonymousPosterName, String content, String postID) {
@@ -135,44 +158,6 @@ public class DatabaseManager {
             e.printStackTrace();
         }
     	return new Response(false);
-    }
-    
-    public Response getGuestPosts() {
-    	return new Response(false);
-    }
-    
-    public Response getAllPosts() {
-    	return new Response(false);
-    }
-
-    public Response getPost(String postID) {
-    	return new Response(false);
-    }
-    
-    public Response auth(String email, String psw) {
-        DocumentSnapshot user = checkEmailExistsAccount(email);
-        if (user == null)
-            return new Response(false,"The account with this email address does not exist");
-        else if (!user.get("password").equals(psw))
-            return new Response(false, "Either your login email or password is incorrect");
-        return new Response(true,null,user.toObject(User.class));
-    }
-
-    public Response insertPostToDbAfter(String userID, Post post) {
-        // insert a new post
-    	 String uuid = UUID.randomUUID().toString();
-         String anonymousPosterName = uuid;
-         DocumentReference docRef = db
-                 .collection(K.POSTS_COLLECTION)
-                 .document(post.getPostID());
-         ApiFuture<WriteResult> future = docRef.set(post);
-         try {
-             System.out.println(future.get().getUpdateTime());
-             return new Response(true,null,post);
-         } catch (InterruptedException | ExecutionException e) {
-             e.printStackTrace();
-         }
-     	return new Response(false);
     }
 
     public Post queryPostByID(String postID) {
@@ -201,6 +186,18 @@ public class DatabaseManager {
     	return post;
     }
 
+    // TODO
+    public Response like(String postID, String userID) {
+        // append the postID to user's likedPostIDs array
+        return null;
+    }
+
+    // TODO
+    public Response dislike(String postID, String userID) {
+        // remove the postID from user's likedPostIDs array
+        return null;
+    }
+
     public ArrayList<Post> queryPostsBy(String keyword) {
         // get posts
         return getSamplePosts();
@@ -210,12 +207,12 @@ public class DatabaseManager {
     	CollectionReference commentRef = db
     			.collection(K.POSTS_COLLECTION + "/" + postID + "/comments");
     	ApiFuture<QuerySnapshot> postComments = commentRef.get();
-    	List<QueryDocumentSnapshot> documents = null;
-    	ArrayList<Comment> postCommentData = new ArrayList<Comment>();
+    	List<QueryDocumentSnapshot> documents;
+    	ArrayList<Comment> postCommentData = new ArrayList<>();
     	try {
 			documents = postComments.get().getDocuments();
 			for (QueryDocumentSnapshot document : documents) {
-				Comment comment = null;
+				Comment comment;
 				comment = document.toObject(Comment.class);
 				System.out.println("document data comments" + document.getData());
 				postCommentData.add(comment);
