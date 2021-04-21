@@ -5,7 +5,6 @@ import com.google.cloud.firestore.*;
 import com.google.firebase.cloud.FirestoreClient;
 import com.model.*;
 
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -37,16 +36,11 @@ public class DatabaseManager {
     }
 
     private ArrayList<Post> getSamplePosts() {
-        ArrayList<Post> arr = new ArrayList<Post>();
+        ArrayList<Post> arr = new ArrayList<>();
         for (int i=0; i<10; i++) {
             arr.add(getSamplePost());
         }
         return arr;
-    }
-
-    private Comment getSampleComment() {
-        return new Comment("anony-name",
-                "this is comment content...");
     }
 
     private DatabaseManager() {
@@ -145,12 +139,12 @@ public class DatabaseManager {
     }
     
     public Response insertComment(String anonymousPosterName, String content, String postID) {
-    	String uuid = UUID.randomUUID().toString();
     	DocumentReference docRef = db
-                .collection(K.POSTS_COLLECTION + "/" + postID + "/comments")
-                .document(uuid);
+                .collection(K.POSTS_COLLECTION)
+                .document(postID);
     	Comment comment = new Comment(anonymousPosterName, content);
-    	ApiFuture<WriteResult> future = docRef.set(comment);
+    	// append the newly created comment to post's comments array
+    	ApiFuture<WriteResult> future = docRef.update(K.POSTS_COMMENTS_FIELD, FieldValue.arrayUnion(comment));
     	try {
             System.out.println(future.get().getUpdateTime());
             return new Response(true,null,comment);

@@ -7,4 +7,6 @@ public class K {
     public static final String POSTS_COLLECTION = "posts";
 
     public static final String USERS_POSTIDS_FIELD = "postIDs";
+    public static final String USERS_LIKEDPOSTIDS_FIELD = "likedPostIDs";
+    public static final String POSTS_COMMENTS_FIELD = "comments";
 }
