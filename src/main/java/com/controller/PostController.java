@@ -31,4 +31,5 @@ public class PostController {
     public ResponseEntity getPosts(@RequestParam(value = "keyword",defaultValue = "") String keyword) {
         return postService.getPosts(keyword);
     }
+
 }

@@ -14,6 +14,6 @@ public class CommentService {
         		comment.getContent(), postID);
         return ResponseEntity
                 .ok()
-                .body(new Response<Comment>(true,null,comment));
+                .body(new Response<>(true,null,comment));
     }
 }

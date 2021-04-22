@@ -57,6 +57,8 @@ public class DatabaseManager {
         }
     }
 
+    // authentication service methods:
+
     private @Nullable DocumentSnapshot checkEmailExistsAccount(String email) {
         CollectionReference users = db.collection(K.USERS_COLLECTION);
         Query query = users.whereEqualTo("email",email).limit(1);
@@ -103,6 +105,8 @@ public class DatabaseManager {
         return new Response(true,null,user.toObject(User.class));
     }
 
+    // Post service methods:
+
     public Response createPost(String content, String anonymousPosterName, 
     							String userUuid) {
         String uuid = UUID.randomUUID().toString();
@@ -137,47 +141,30 @@ public class DatabaseManager {
             e.printStackTrace();
         }
     }
-    
-    public Response insertComment(String anonymousPosterName, String content, String postID) {
-    	DocumentReference docRef = db
-                .collection(K.POSTS_COLLECTION)
-                .document(postID);
-    	Comment comment = new Comment(anonymousPosterName, content);
-    	// append the newly created comment to post's comments array
-    	ApiFuture<WriteResult> future = docRef.update(K.POSTS_COMMENTS_FIELD, FieldValue.arrayUnion(comment));
-    	try {
-            System.out.println(future.get().getUpdateTime());
-            return new Response(true,null,comment);
-        } catch (InterruptedException | ExecutionException e) {
-            e.printStackTrace();
-        }
-    	return new Response(false);
-    }
 
     public Post queryPostByID(String postID) {
         // get a post
-    	DocumentReference docRef = db
-    			.collection(K.POSTS_COLLECTION)
-    			.document(postID);
-    	ApiFuture<DocumentSnapshot> future = docRef.get();
-    	DocumentSnapshot document;
-    	Post post = null;
-		try {
-			document = future.get();
-			if (document.exists()) {
-				post = document.toObject(Post.class);
-				System.out.println("Document data: " + document.getData());
-				post.setComments(getCommentsForPost(postID));
-				return post;
-	    	} else {
-	    		System.out.println("No such document!");
-	   		}
-		} catch (InterruptedException | ExecutionException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+        DocumentReference docRef = db
+                .collection(K.POSTS_COLLECTION)
+                .document(postID);
+        ApiFuture<DocumentSnapshot> future = docRef.get();
+        DocumentSnapshot document;
+        Post post;
+        try {
+            document = future.get();
+            if (document.exists()) {
+                post = document.toObject(Post.class);
+                System.out.println("Document data: " + document.getData());
+                return post;
+            } else {
+                System.out.println("No such document!");
+            }
+        } catch (InterruptedException | ExecutionException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
 
-    	return post;
+        return null;
     }
 
     // TODO
@@ -192,29 +179,67 @@ public class DatabaseManager {
         return null;
     }
 
+    // TODO
     public ArrayList<Post> queryPostsBy(String keyword) {
         // get posts
         return getSamplePosts();
     }
-    
-    public ArrayList<Comment> getCommentsForPost(String postID) {
-    	CollectionReference commentRef = db
-    			.collection(K.POSTS_COLLECTION + "/" + postID + "/comments");
-    	ApiFuture<QuerySnapshot> postComments = commentRef.get();
-    	List<QueryDocumentSnapshot> documents;
-    	ArrayList<Comment> postCommentData = new ArrayList<>();
-    	try {
-			documents = postComments.get().getDocuments();
-			for (QueryDocumentSnapshot document : documents) {
-				Comment comment;
-				comment = document.toObject(Comment.class);
-				System.out.println("document data comments" + document.getData());
-				postCommentData.add(comment);
-			}
-		} catch (InterruptedException | ExecutionException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-		}
-    	return postCommentData;
+
+    // Comment service methods:
+
+    // add the comment object just created to 'notifications' collection with an according userID(post's poster) field
+    public Response insertComment(String anonymousPosterName, String content, String postID) {
+        String commentId = UUID.randomUUID().toString();
+    	DocumentReference docRef = db
+                .collection(K.POSTS_COLLECTION)
+                .document(postID);
+        ApiFuture<DocumentSnapshot> future = docRef.get();
+        Comment comment = new Comment(anonymousPosterName, content);
+        try {
+            // append the newly created comment to post's comments array
+            docRef.update(K.POSTS_COMMENTS_FIELD, FieldValue.arrayUnion(comment));
+
+            String userUuidToNotify = future.get().getString(K.POSTS_USERID_FIELD);
+            insertCommentToNotificationsCollection(userUuidToNotify, postID, comment);
+            return new Response(true,null,comment);
+        } catch (InterruptedException | ExecutionException e) {
+            e.printStackTrace();
+        }
+    	return new Response(false);
     }
+
+    private void insertCommentToNotificationsCollection(String userUuidToNotify, String postID, Comment comment) {
+        String notificationID = UUID.randomUUID().toString();
+        DocumentReference docRef = db
+                .collection(K.NOTIFICATIONS_COLLECTION)
+                .document(notificationID);
+        Notification notification = new Notification(notificationID,
+                postID,
+                userUuidToNotify,
+                comment.getAnonymousPosterName(),
+                comment.getContent());
+        ApiFuture<WriteResult> future = docRef.set(notification);
+        try {
+            System.out.println("notification inserted" + future.get().getUpdateTime());
+        } catch (InterruptedException | ExecutionException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public Response getNotifications(String userID) {
+        CollectionReference ref = db.collection(K.NOTIFICATIONS_COLLECTION);
+        Query query = ref.whereEqualTo(K.NOTIFICATIONS_USERID_FIELD,userID);
+        ApiFuture<QuerySnapshot> future = query.get();
+        try {
+            ArrayList<Comment> arr = new ArrayList<>();
+            for (DocumentSnapshot documentSnapshot: future.get().getDocuments()) {
+                arr.add(documentSnapshot.toObject(Comment.class));
+            }
+            return new Response(true,null,arr);
+        } catch (InterruptedException | ExecutionException e) {
+            e.printStackTrace();
+        }
+        return new Response(false,"no notification found");
+    }
+
 }
