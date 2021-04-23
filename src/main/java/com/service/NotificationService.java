@@ -22,4 +22,16 @@ public class NotificationService {
                 .ok()
                 .body(response);
     }
+
+    public ResponseEntity removeNotifications(String notificationID) {
+        Response response = DatabaseManager.shared.removeNotification(notificationID);
+        if (response.getStatus()) {
+            return ResponseEntity
+                    .ok()
+                    .body(response);
+        }
+        return ResponseEntity
+                .badRequest()
+                .body(response);
+    }
 }

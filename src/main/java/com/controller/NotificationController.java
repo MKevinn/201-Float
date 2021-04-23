@@ -20,10 +20,8 @@ public class NotificationController {
         return notificationService.getNotifications(userid);
     }
 
-    // TODO: user read a notification
-//    @GetMapping("/remove")
-//    public ResponseEntity removeNotification(@RequestParam(value = "userid", defaultValue = "") String userid,
-//                                             @RequestParam(value = "notificationid", defaultValue = "") String notificationid) {
-//        return null;
-//    }
+    @GetMapping("/read")
+    public ResponseEntity removeNotification(@RequestParam(value = "notificationid", defaultValue = "") String notificationid) {
+        return notificationService.removeNotifications(notificationid);
+    }
 }

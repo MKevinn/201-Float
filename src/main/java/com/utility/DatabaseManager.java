@@ -194,7 +194,7 @@ public class DatabaseManager {
                 .collection(K.POSTS_COLLECTION)
                 .document(postID);
         ApiFuture<DocumentSnapshot> future = docRef.get();
-        Comment comment = new Comment(anonymousPosterName, content);
+        Comment comment = new Comment(commentId, anonymousPosterName, content);
         try {
             // append the newly created comment to post's comments array
             docRef.update(K.POSTS_COMMENTS_FIELD, FieldValue.arrayUnion(comment));
@@ -205,7 +205,7 @@ public class DatabaseManager {
         } catch (InterruptedException | ExecutionException e) {
             e.printStackTrace();
         }
-    	return new Response(false);
+    	return new Response(false, "an internal error occurred when inserting comment to database");
     }
 
     private void insertCommentToNotificationsCollection(String userUuidToNotify, String postID, Comment comment) {
@@ -231,15 +231,29 @@ public class DatabaseManager {
         Query query = ref.whereEqualTo(K.NOTIFICATIONS_USERID_FIELD,userID);
         ApiFuture<QuerySnapshot> future = query.get();
         try {
-            ArrayList<Comment> arr = new ArrayList<>();
+            ArrayList<Notification> arr = new ArrayList<>();
             for (DocumentSnapshot documentSnapshot: future.get().getDocuments()) {
-                arr.add(documentSnapshot.toObject(Comment.class));
+                arr.add(documentSnapshot.toObject(Notification.class));
             }
             return new Response(true,null,arr);
         } catch (InterruptedException | ExecutionException e) {
             e.printStackTrace();
         }
         return new Response(false,"no notification found");
+    }
+
+    public Response removeNotification(String notificationID) {
+        DocumentReference docRef = db
+                .collection(K.NOTIFICATIONS_COLLECTION)
+                .document(notificationID);
+        ApiFuture<WriteResult> future = docRef.delete();
+        try {
+            System.out.println("notification read: "+future.get().getUpdateTime());
+            return new Response(true);
+        } catch (InterruptedException | ExecutionException e) {
+            e.printStackTrace();
+        }
+        return new Response(false);
     }
 
 }
