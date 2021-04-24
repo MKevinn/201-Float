@@ -21,6 +21,30 @@ public class PostService {
                 ok().
                 body(response);
     }
+    
+    public ResponseEntity likePost(String postID, String userID) {
+    	 Response response = DatabaseManager.shared.like(postID, userID);
+         if (response.getStatus()) {
+             return ResponseEntity
+                     .ok()
+                     .body(response);
+         }
+         return ResponseEntity
+                 .badRequest()
+                 .body(response);
+    }
+    
+    public ResponseEntity dislikePost(String postID, String userID) {
+    	 Response response = DatabaseManager.shared.dislike(postID, userID);
+         if (response.getStatus()) {
+             return ResponseEntity
+                     .ok()
+                     .body(response);
+         }
+         return ResponseEntity
+                 .badRequest()
+                 .body(response);
+    }
 
     public ResponseEntity readPost(String postID) {
         Post post = DatabaseManager.shared.queryPostByID(postID);
