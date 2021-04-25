@@ -22,6 +22,16 @@ public class PostController {
         return postService.insertPost(post);
     }
 
+    @PostMapping("/like")
+    public ResponseEntity likePost(@RequestBody Post post) {
+        return postService.likePost(post.getPostID(), post.getUserUuid());
+    }
+    
+    @PostMapping("/dislike")
+    public ResponseEntity dislikePost(@RequestBody Post post) {
+        return postService.dislikePost(post.getPostID(), post.getUserUuid());
+    }
+    
     @GetMapping("/read")
     public ResponseEntity readPost(@RequestParam(value = "postid",defaultValue = "") String postID) {
         return postService.readPost(postID);
@@ -31,5 +41,4 @@ public class PostController {
     public ResponseEntity getPosts(@RequestParam(value = "keyword",defaultValue = "") String keyword) {
         return postService.getPosts(keyword);
     }
-
 }

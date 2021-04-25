@@ -170,19 +170,76 @@ public class DatabaseManager {
     // TODO
     public Response like(String postID, String userID) {
         // append the postID to user's likedPostIDs array
-        return null;
+    	DocumentReference postRef = db
+                .collection(K.POSTS_COLLECTION)
+                .document(postID);
+    	DocumentReference userRef = db
+    			.collection(K.USERS_COLLECTION)
+                .document(userID);
+    	ApiFuture<WriteResult> future = postRef.update("likedCount", FieldValue.increment(1));
+    	try {
+            System.out.println("post " + postID + " disliked "+ future.get().getUpdateTime());
+        } catch (InterruptedException | ExecutionException e) {
+            e.printStackTrace();
+            return new Response(false, "an internal error occurred when liking post");
+        }
+    	ApiFuture<WriteResult> userFuture = postRef.update("likedPostIDs", FieldValue.arrayUnion(postID));
+    	try {
+            System.out.println("post " + postID + " liked " + future.get().getUpdateTime());
+        } catch (InterruptedException | ExecutionException e) {
+            e.printStackTrace();
+            return new Response(false, "an internal error occurred when liking post");
+        }
+    	return new Response(true);
     }
 
     // TODO
     public Response dislike(String postID, String userID) {
         // remove the postID from user's likedPostIDs array
-        return null;
+    	DocumentReference postRef = db
+                .collection(K.POSTS_COLLECTION)
+                .document(postID);
+    	DocumentReference userRef = db
+                .collection(K.USERS_COLLECTION)
+                .document(userID);
+    	ApiFuture<WriteResult> future = postRef.update("likedCount", FieldValue.increment(-1));
+    	try {
+            System.out.println("post " + postID + " disliked "+ future.get().getUpdateTime());
+        } catch (InterruptedException | ExecutionException e) {
+            e.printStackTrace();
+            return new Response(false, "an internal error occurred when disliking post");
+        }
+    	ApiFuture<WriteResult> userFuture = postRef.update("likedPostIDs", FieldValue.arrayRemove(postID));
+    	try {
+            System.out.println("post " + postID + " disliked "+ future.get().getUpdateTime());
+        } catch (InterruptedException | ExecutionException e) {
+            e.printStackTrace();
+            return new Response(false, "an internal error occurred when disliking post");
+        }
+    	return new Response(true);
     }
 
     // TODO
     public ArrayList<Post> queryPostsBy(String keyword) {
         // get posts
-        return getSamplePosts();
+    	ArrayList<Post> posts = new ArrayList<>();
+    	CollectionReference cities = db.collection(K.POSTS_COLLECTION);
+    	// Create a query against the collection.
+    	Query query = cities.whereEqualTo("anonymousPosterName", keyword);
+    	// retrieve  query results asynchronously using query.get()
+    	ApiFuture<QuerySnapshot> querySnapshot = query.get();
+
+    	try {
+			for (DocumentSnapshot document : querySnapshot.get().getDocuments()) {
+			  posts.add(document.toObject(Post.class));
+				System.out.println(document.getId());
+			}
+			return posts;
+		} catch (InterruptedException | ExecutionException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+    	return null;
     }
 
     // Comment service methods:
@@ -205,7 +262,7 @@ public class DatabaseManager {
         } catch (InterruptedException | ExecutionException e) {
             e.printStackTrace();
         }
-    	return new Response(false, "an internal error occurred when inserting comment to database");
+        return new Response(false, "an internal error occurred when inserting comment");
     }
 
     private void insertCommentToNotificationsCollection(String userUuidToNotify, String postID, Comment comment) {
