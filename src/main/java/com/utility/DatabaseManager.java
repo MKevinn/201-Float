@@ -106,24 +106,52 @@ public class DatabaseManager {
         return new Response(true,null,user.toObject(User.class));
     }
 
+    // Tag service methods:
+
+    public Response getAllTags() {
+        DocumentReference docRef = db
+                .collection(K.TAGS_COLLECTION)
+                .document("a");
+        ApiFuture<DocumentSnapshot> future = docRef.get();
+        ArrayList<String> arr;
+        try {
+            arr = (ArrayList<String>) future.get().get("a");
+        } catch (InterruptedException | ExecutionException e) {
+            e.printStackTrace();
+            return new Response(false,"error occurred when getting tags");
+        }
+        return new Response(true,null,arr);
+    }
+
+    private void insertTag(ArrayList<String> tags) {
+        DocumentReference docRef = db
+                .collection(K.TAGS_COLLECTION)
+                .document("a");
+        for (String tag: tags) {
+            docRef.update("a", FieldValue.arrayUnion(tag));
+        }
+    }
+
     // Post service methods:
 
-    public Response createPost(String content, String anonymousPosterName, 
-    							String userUuid) {
+    public Response createPost(Post post) {
         String uuid = UUID.randomUUID().toString();
         DocumentReference docRef = db
                 .collection(K.POSTS_COLLECTION)
                 .document(uuid);
-        Post post = new Post(uuid, 
-			        		content, new ArrayList<>(), 0, 
-			        		new ArrayList<>() , 
-			        		anonymousPosterName, 
-			        		userUuid);
-        ApiFuture<WriteResult> future = docRef.set(post);
-        insertPostToDbAfterUser(userUuid,uuid);
+        Post newPost = new Post(uuid,
+			        		post.getContent(),
+                            post.getTags(),
+                            0,
+			        		new ArrayList<>() ,
+			        		post.getAnonymousPosterName(),
+			        		post.getUserUuid());
+        ApiFuture<WriteResult> future = docRef.set(newPost);
+        insertPostToDbAfterUser(post.getUserUuid(),uuid);
+        insertTag(post.getTags());
         try {
             System.out.println(future.get().getUpdateTime());
-            return new Response(true,null,post);
+            return new Response(true,null,newPost);
         } catch (InterruptedException | ExecutionException e) {
             e.printStackTrace();
         }
@@ -183,7 +211,7 @@ public class DatabaseManager {
             e.printStackTrace();
             return new Response(false, "an internal error occurred when liking post");
         }
-    	ApiFuture<WriteResult> userFuture = userRef.update("likedPostIDs", FieldValue.arrayUnion(postID));
+    	ApiFuture<WriteResult> userFuture = userRef.update(K.USERS_LIKEDPOSTIDS_FIELD, FieldValue.arrayUnion(postID));
     	try {
             System.out.println("user liked " + userFuture.get().getUpdateTime());
         } catch (InterruptedException | ExecutionException e) {
@@ -208,7 +236,7 @@ public class DatabaseManager {
             e.printStackTrace();
             return new Response(false, "an internal error occurred when disliking post");
         }
-    	ApiFuture<WriteResult> userFuture = userRef.update("likedPostIDs", FieldValue.arrayRemove(postID));
+    	ApiFuture<WriteResult> userFuture = userRef.update(K.USERS_LIKEDPOSTIDS_FIELD, FieldValue.arrayRemove(postID));
     	try {
             System.out.println("user disliked "+ userFuture.get().getUpdateTime());
         } catch (InterruptedException | ExecutionException e) {
@@ -218,18 +246,30 @@ public class DatabaseManager {
     	return new Response(true);
     }
 
-    public ArrayList<Post> queryPostsBy(String keyword) {
+    // TODO
+    public ArrayList<Post> queryPostsBy(String keyword, String tagsString) {
         // get posts
     	ArrayList<Post> posts = new ArrayList<>();
     	CollectionReference collectionReference = db.collection(K.POSTS_COLLECTION);
     	Query query = collectionReference.limit(100);
     	ApiFuture<QuerySnapshot> querySnapshot = query.get();
+    	String[] tags = tagsString.split(",");
+    	for (String tag: tags) System.out.println(tag);
     	try {
 			for (DocumentSnapshot document: querySnapshot.get().getDocuments()) {
 			    Post post = document.toObject(Post.class);
-			    if (post.getContent().contains(keyword.toLowerCase())
-                        || post.getContent().contains(keyword.toUpperCase())) {
+			    if (!post.getContent().contains(keyword.toLowerCase())
+                        && !post.getContent().contains(keyword.toUpperCase())
+                        && !post.getTags().contains(keyword)) continue;
+			    if (tagsString.equals("")) {
                     posts.add(post);
+                } else {
+                    for (String tag: tags) {
+                        if (post.getTags().contains(tag)) {
+                            posts.add(post);
+                            break;
+                        }
+                    }
                 }
 			}
 			return posts;

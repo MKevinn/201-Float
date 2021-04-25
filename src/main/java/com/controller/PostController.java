@@ -38,7 +38,8 @@ public class PostController {
     }
 
     @GetMapping("/get")
-    public ResponseEntity getPosts(@RequestParam(value = "keyword",defaultValue = "") String keyword) {
-        return postService.getPosts(keyword);
+    public ResponseEntity getPosts(@RequestParam(value = "keyword",defaultValue = "") String keyword,
+                                   @RequestParam(value = "tags", defaultValue = "") String tags) {
+        return postService.getPosts(keyword, tags);
     }
 }

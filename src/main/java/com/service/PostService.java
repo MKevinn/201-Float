@@ -12,7 +12,7 @@ import java.util.ArrayList;
 public class PostService {
 
     public ResponseEntity insertPost(Post post) {
-    	Response<Post> response = DatabaseManager.shared.createPost(post.getContent(), post.getAnonymousPosterName(), post.getUserUuid());
+    	Response<Post> response = DatabaseManager.shared.createPost(post);
     	if (!response.getStatus())
             return ResponseEntity
                     .status(502)
@@ -59,8 +59,8 @@ public class PostService {
                 .body(new Response<>(true,null,post));
     }
 
-    public ResponseEntity getPosts(String keyword) {
-        ArrayList<Post> arr = DatabaseManager.shared.queryPostsBy(keyword);
+    public ResponseEntity getPosts(String keyword, String tags) {
+        ArrayList<Post> arr = DatabaseManager.shared.queryPostsBy(keyword, tags);
         if (arr == null || arr.isEmpty()) {
             return ResponseEntity
                     .status(502)
