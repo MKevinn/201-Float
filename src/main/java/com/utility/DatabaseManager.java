@@ -178,14 +178,14 @@ public class DatabaseManager {
                 .document(userID);
     	ApiFuture<WriteResult> future = postRef.update("likedCount", FieldValue.increment(1));
     	try {
-            System.out.println("post " + postID + " disliked "+ future.get().getUpdateTime());
+            System.out.println("post " + postID + " is liked "+ future.get().getUpdateTime());
         } catch (InterruptedException | ExecutionException e) {
             e.printStackTrace();
             return new Response(false, "an internal error occurred when liking post");
         }
-    	ApiFuture<WriteResult> userFuture = postRef.update("likedPostIDs", FieldValue.arrayUnion(postID));
+    	ApiFuture<WriteResult> userFuture = userRef.update("likedPostIDs", FieldValue.arrayUnion(postID));
     	try {
-            System.out.println("post " + postID + " liked " + future.get().getUpdateTime());
+            System.out.println("user liked " + userFuture.get().getUpdateTime());
         } catch (InterruptedException | ExecutionException e) {
             e.printStackTrace();
             return new Response(false, "an internal error occurred when liking post");
@@ -204,14 +204,14 @@ public class DatabaseManager {
                 .document(userID);
     	ApiFuture<WriteResult> future = postRef.update("likedCount", FieldValue.increment(-1));
     	try {
-            System.out.println("post " + postID + " disliked "+ future.get().getUpdateTime());
+            System.out.println("post " + postID + " is disliked "+ future.get().getUpdateTime());
         } catch (InterruptedException | ExecutionException e) {
             e.printStackTrace();
             return new Response(false, "an internal error occurred when disliking post");
         }
-    	ApiFuture<WriteResult> userFuture = postRef.update("likedPostIDs", FieldValue.arrayRemove(postID));
+    	ApiFuture<WriteResult> userFuture = userRef.update("likedPostIDs", FieldValue.arrayRemove(postID));
     	try {
-            System.out.println("post " + postID + " disliked "+ future.get().getUpdateTime());
+            System.out.println("user disliked "+ userFuture.get().getUpdateTime());
         } catch (InterruptedException | ExecutionException e) {
             e.printStackTrace();
             return new Response(false, "an internal error occurred when disliking post");

@@ -30,7 +30,7 @@ public class PostService {
                      .body(response);
          }
          return ResponseEntity
-                 .badRequest()
+                 .status(502)
                  .body(response);
     }
     
@@ -42,7 +42,7 @@ public class PostService {
                      .body(response);
          }
          return ResponseEntity
-                 .badRequest()
+                 .status(502)
                  .body(response);
     }
 
@@ -56,7 +56,7 @@ public class PostService {
         }
         return ResponseEntity
                 .ok()
-                .body(new Response<Post>(true,null,post));
+                .body(new Response<>(true,null,post));
     }
 
     public ResponseEntity getPosts(String keyword) {
