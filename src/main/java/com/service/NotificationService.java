@@ -15,7 +15,7 @@ public class NotificationService {
         Response<ArrayList<Comment>> response = DatabaseManager.shared.getNotifications(userID);
         if (!response.getStatus()) {
             return ResponseEntity
-                    .badRequest()
+                    .status(502)
                     .body(response);
         }
         return ResponseEntity
@@ -31,7 +31,7 @@ public class NotificationService {
                     .body(response);
         }
         return ResponseEntity
-                .badRequest()
+                .status(502)
                 .body(response);
     }
 }

@@ -15,7 +15,7 @@ public class PostService {
     	Response<Post> response = DatabaseManager.shared.createPost(post.getContent(), post.getAnonymousPosterName(), post.getUserUuid());
     	if (!response.getStatus())
             return ResponseEntity
-                    .badRequest()
+                    .status(502)
                     .body(response);
         return ResponseEntity.
                 ok().
@@ -26,7 +26,7 @@ public class PostService {
         Post post = DatabaseManager.shared.queryPostByID(postID);
         if (post==null) {
             return ResponseEntity
-                    .badRequest()
+                    .status(502)
                     .body(new Response(false,
                             String.format("no post associated with id %s exists",postID)));
         }
@@ -39,7 +39,7 @@ public class PostService {
         ArrayList<Post> arr = DatabaseManager.shared.queryPostsBy(keyword);
         if (arr == null || arr.isEmpty()) {
             return ResponseEntity
-                    .badRequest()
+                    .status(502)
                     .body(new Response(false,"none found"));
         }
         return ResponseEntity

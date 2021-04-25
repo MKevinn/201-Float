@@ -18,7 +18,7 @@ public class CommentService {
                     .body(response);
         }
         return ResponseEntity
-                .badRequest()
+                .status(502)
                 .body(response);
     }
 }
