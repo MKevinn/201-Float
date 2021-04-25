@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 
@@ -167,7 +168,6 @@ public class DatabaseManager {
         return null;
     }
 
-    // TODO
     public Response like(String postID, String userID) {
         // append the postID to user's likedPostIDs array
     	DocumentReference postRef = db
@@ -193,7 +193,6 @@ public class DatabaseManager {
     	return new Response(true);
     }
 
-    // TODO
     public Response dislike(String postID, String userID) {
         // remove the postID from user's likedPostIDs array
     	DocumentReference postRef = db
@@ -219,24 +218,22 @@ public class DatabaseManager {
     	return new Response(true);
     }
 
-    // TODO
     public ArrayList<Post> queryPostsBy(String keyword) {
         // get posts
     	ArrayList<Post> posts = new ArrayList<>();
-    	CollectionReference cities = db.collection(K.POSTS_COLLECTION);
-    	// Create a query against the collection.
-    	Query query = cities.whereEqualTo("anonymousPosterName", keyword);
-    	// retrieve  query results asynchronously using query.get()
+    	CollectionReference collectionReference = db.collection(K.POSTS_COLLECTION);
+    	Query query = collectionReference.limit(100);
     	ApiFuture<QuerySnapshot> querySnapshot = query.get();
-
     	try {
-			for (DocumentSnapshot document : querySnapshot.get().getDocuments()) {
-			  posts.add(document.toObject(Post.class));
-				System.out.println(document.getId());
+			for (DocumentSnapshot document: querySnapshot.get().getDocuments()) {
+			    Post post = document.toObject(Post.class);
+			    if (post.getContent().contains(keyword.toLowerCase())
+                        || post.getContent().contains(keyword.toUpperCase())) {
+                    posts.add(post);
+                }
 			}
 			return posts;
 		} catch (InterruptedException | ExecutionException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
     	return null;
