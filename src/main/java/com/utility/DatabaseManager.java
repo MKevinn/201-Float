@@ -7,10 +7,7 @@ import com.model.*;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Locale;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.ExecutionException;
 
 import com.google.auth.oauth2.GoogleCredentials;
@@ -25,24 +22,6 @@ public class DatabaseManager {
     public static DatabaseManager shared = new DatabaseManager();
 
     private Firestore db;
-
-    private Post getSamplePost() {
-        return new Post(UUID.randomUUID().toString(),
-                "content......",
-                new ArrayList<>(),
-                5,
-                new ArrayList<>(),
-                "the-name",
-                UUID.randomUUID().toString());
-    }
-
-    private ArrayList<Post> getSamplePosts() {
-        ArrayList<Post> arr = new ArrayList<>();
-        for (int i=0; i<10; i++) {
-            arr.add(getSamplePost());
-        }
-        return arr;
-    }
 
     private DatabaseManager() {
         try {
@@ -145,7 +124,8 @@ public class DatabaseManager {
                             0,
 			        		new ArrayList<>() ,
 			        		post.getAnonymousPosterName(),
-			        		post.getUserUuid());
+			        		post.getUserUuid(),
+                            new Date());
         ApiFuture<WriteResult> future = docRef.set(newPost);
         insertPostToDbAfterUser(post.getUserUuid(),uuid);
         insertTag(post.getTags());
@@ -189,10 +169,8 @@ public class DatabaseManager {
                 System.out.println("No such document!");
             }
         } catch (InterruptedException | ExecutionException e) {
-            // TODO Auto-generated catch block
             e.printStackTrace();
         }
-
         return null;
     }
 
@@ -246,15 +224,15 @@ public class DatabaseManager {
     	return new Response(true);
     }
 
-    // TODO
     public ArrayList<Post> queryPostsBy(String keyword, String tagsString) {
         // get posts
     	ArrayList<Post> posts = new ArrayList<>();
     	CollectionReference collectionReference = db.collection(K.POSTS_COLLECTION);
-    	Query query = collectionReference.limit(100);
+    	Query query = collectionReference
+                .limit(100)
+                .orderBy("timestamp", Query.Direction.DESCENDING);
     	ApiFuture<QuerySnapshot> querySnapshot = query.get();
     	String[] tags = tagsString.split(",");
-    	for (String tag: tags) System.out.println(tag);
     	try {
 			for (DocumentSnapshot document: querySnapshot.get().getDocuments()) {
 			    Post post = document.toObject(Post.class);
@@ -265,7 +243,8 @@ public class DatabaseManager {
                     posts.add(post);
                 } else {
                     for (String tag: tags) {
-                        if (post.getTags().contains(tag)) {
+                        if (post.getTags().contains(tag.toLowerCase())
+                                || post.getTags().contains(tag.toUpperCase())) {
                             posts.add(post);
                             break;
                         }

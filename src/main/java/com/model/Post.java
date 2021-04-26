@@ -1,7 +1,7 @@
 package com.model;
 
 import java.util.ArrayList;
-import java.util.UUID;
+import java.util.Date;
 
 public class Post {
     private String postID;
@@ -14,10 +14,19 @@ public class Post {
     private String anonymousPosterName;
     private String userUuid;
 
+    private Date timestamp;
+
     public Post() {
     }
 
-    public Post(String postID, String content, ArrayList<String> tags, int likedCount, ArrayList<Comment> comments, String anonymousPosterName, String userUuid) {
+    public Post(String postID,
+                String content,
+                ArrayList<String> tags,
+                int likedCount,
+                ArrayList<Comment> comments,
+                String anonymousPosterName,
+                String userUuid,
+                Date timestamp) {
         this.postID = postID;
         this.content = content;
         this.tags = tags;
@@ -25,6 +34,7 @@ public class Post {
         this.comments = comments;
         this.anonymousPosterName = anonymousPosterName;
         this.userUuid = userUuid;
+        this.timestamp = timestamp;
     }
 
     public ArrayList<Comment> getComments() {
@@ -47,12 +57,8 @@ public class Post {
         return likedCount;
     }
 
-    public void incrementLike() {
-        likedCount++;
-    }
-
-    public void decrementLike() {
-        likedCount--;
+    public Date getTimestamp() {
+        return timestamp;
     }
 
     public String getAnonymousPosterName() {
